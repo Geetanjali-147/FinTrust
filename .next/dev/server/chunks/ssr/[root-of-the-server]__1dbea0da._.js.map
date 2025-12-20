@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/ASUS/Downloads/loan-approval-frontend/app/dashboard/analytics/page.tsx"],"sourcesContent":["export default function AnalyticsPage() {\r\n    return (\r\n        <div className=\"flex items-center justify-center h-full\">\r\n            <h1 className=\"text-2xl font-bold text-muted-foreground\">Analytics - Coming Soon</h1>\r\n        </div>\r\n    )\r\n}\r\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACpB,qBACI,8OAAC;QAAI,WAAU;kBACX,cAAA,8OAAC;YAAG,WAAU;sBAA2C;;;;;;;;;;;AAGrE"}}]
+}
