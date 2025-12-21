@@ -4,10 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, ShieldCheck, Zap, Mail, ArrowRight } from "lucide-react"
 import { Hero3D } from "@/components/hero-3d"
 import { Features3D } from "@/components/features-3d"
+import { FaqSection } from "@/components/faq-section"
+import { StatsSection } from "@/components/stats-section"
+import { CoinsBackground } from "@/components/coins-background"
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background relative">
+      <CoinsBackground />
       {/* Header */}
       <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
@@ -60,6 +64,9 @@ export default function LandingPage() {
         </section>
 
 
+
+
+        <StatsSection />
 
         {/* Features Section */}
         <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50 relative overflow-hidden">
@@ -120,6 +127,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        <FaqSection />
       </main>
       <footer className="w-full py-12 md:py-16 bg-background border-t">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
