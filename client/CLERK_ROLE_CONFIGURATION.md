@@ -1,245 +1,125 @@
-# Clerk Role Configuration Guide
+# Clerk Secure Role Integration Guide
 
-This guide explains how to configure user roles in the Clerk dashboard and customize the UI to match your design preferences.
+This document outlines the architecture and implementation of the secure role-based access control (RBAC) system in FinTrust, using Clerk's `privateMetadata` as the single source of truth.
 
-## Setting Up Roles in Clerk Dashboard
+## Architecture Overview
 
-### Step 1: Access Clerk Dashboard
+FinTrust uses a hybrid approach to ensure maximum security while maintaining a smooth user experience:
 
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com)
-2. Select your application
-3. Navigate to **User & Authentication** → **Roles**
+1.  **Source of Truth**: Clerk `privateMetadata`. This is NOT accessible from the client, preventing users from modifying their own roles.
+2.  **Role Manager (Backend)**: An Express server acts as the gatekeeper for role modifications and verification.
+3.  **Client Sync (Frontend)**: A custom hook (`useUserRole`) synchronizes the backend-managed roles with the frontend state and redirects users to appropriate dashboards.
 
-### Step 2: Create Roles
+### Data Flow Diagram
 
-1. Click **"Create Role"**
-2. Add the following roles: `beneficiary`, `officer`
+```mermaid
+sequenceDiagram
+    participant User as Browser
+    participant FE as Next.js Frontend
+    participant Clerk as Clerk Auth
+    participant BE as Express Backend
 
-### Step 3: Role Selection During Sign-up
-
-The application includes a custom sign-up flow where users can select their role:
-
-1. **Role Selection Interface**: Users choose between "Beneficiary" or "Loan Officer" on `/sign-up` page
-2. **Separate Sign-up Components**: 
-   - `components/beneficiary-signup.tsx` for loan applicants
-   - `components/officer-signup.tsx` for loan officers
-3. **Automatic Assignment**: Roles are assigned during the sign-up process
-4. **Immediate Access**: Users are redirected to appropriate dashboards based on their role
-
-**Note**: Admin roles should be assigned manually through the Clerk dashboard for security reasons.
-
-### Step 4: Assign Roles to Users
-
-#### Beneficiary Role
-
-- **Role ID**: `beneficiary`
-- **Description**: Users who apply for loans
-- **Permissions**: Access to onboarding, consent, and status pages
-
-#### Officer Role
-
-- **Role ID**: `officer`
-- **Description**: Loan officers who review applications
-- **Permissions**: Access to application management and review pages
-
-#### Admin Role
-
-- **Role ID**: `admin`
-- **Description**: System administrators with full access
-- **Permissions**: Access to all features including user management and system settings
-
-### Step 3: Assign Roles to Users
-
-1. Go to **User Management** → **Users**
-2. Select a user
-3. Click **"Add Role"**
-4. Assign either `beneficiary` or `officer` role
-
-### Step 4: Configure Role-Based Access
-
-You can also set up role-based access through:
-
-- **Organization Memberships**: Create organizations for different user types
-- **Custom Claims**: Add custom metadata to user sessions
-
-## Customizing Clerk UI Components
-
-### 1. Authentication Buttons Styling
-
-The `AuthButtons` component in `components/auth-buttons.tsx` includes:
-
-- Role indicators (Officer/Beneficiary badges)
-- Custom styling to match FinTrust design
-- Proper color schemes and hover effects
-
-### 2. Sign-in/Sign-up Page Styling
-
-Both `app/login/page.tsx` and `app/sign-up/page.tsx` include:
-
-- Custom input field styling
-- Primary button customization
-- Card and header styling
-- Social login button styling
-
-### 3. User Button Customization
-
-The UserButton in the header includes:
-
-- Custom popover styling
-- Role-based indicators
-- Proper color matching
-
-## UI Customization Examples
-
-### Color Scheme Integration
-
-```typescript
-appearance={{
-  elements: {
-    formButtonPrimary: 'bg-primary hover:bg-primary/90 text-primary-foreground',
-    input: 'bg-secondary border-border text-foreground',
-    card: 'bg-card border-border',
-  }
-}}
+    User->>FE: Sign Up (Beneficiary/Officer)
+    FE->>Clerk: Authentication Flow
+    Clerk-->>FE: JWT Session Token
+    FE->>BE: POST /api/auth/assign-role (JWT Token + Role)
+    BE->>Clerk: Update User privateMetadata (role: '...')
+    Clerk-->>BE: Success
+    BE-->>FE: User Object with Role
+    FE->>FE: Redirect to Dashboard (/onboarding or /officer/...)
 ```
 
-### Typography Integration
+---
 
+## Backend Implementation Details
+
+**Base URL**: `http://localhost:5000/api/auth`
+
+### 1. Security Middleware (`auth.ts`)
+The server uses `verifyToken` from `@clerk/backend` for **networkless verification**.
+- **Requirement**: `CLERK_SECRET_KEY` must be present in `server/.env`.
+- **Logic**: It verifies the JWT token from the client, extracts the `sub` (userId), and attaches the user's role from Clerk's `privateMetadata` to the request object.
+
+### 2. Endpoints
+- `GET /me`: Returns the current user's information and role. Returns `404 (ROLE_NOT_SET)` if no role is found in metadata.
+- `POST /assign-role`: Validates the requested role (`BENEFICIARY` | `OFFICER`) and updates Clerk's `privateMetadata`.
+
+### 3. Usage in Routes
+Protect any backend route using the `requireRole` middleware:
 ```typescript
-appearance={{
-  elements: {
-    headerTitle: 'text-2xl font-bold text-foreground',
-    headerSubtitle: 'text-muted-foreground text-sm',
-  }
-}}
+import { authenticateUser, requireRole } from '../middleware/auth'
+
+router.get('/applications', authenticateUser, requireRole(['OFFICER']), async (req, res) => {
+  // Only accessible by officers
+})
 ```
 
-### Spacing and Layout
+---
 
-```typescript
-appearance={{
-  elements: {
-    formFieldInput: 'w-full px-3 py-2 rounded-md',
-    socialButtonsBlockButton: 'w-full bg-secondary hover:bg-secondary/80',
-  }
-}}
-```
+## Frontend Implementation Details
 
-## Role-Based Route Protection
+### 1. The `useUserRole` Hook
+This is the primary way to interact with roles on the frontend.
+- **Auto-Sync**: Fetches the role from the backend on mount.
+- **Persistence**: Synced with `localStorage` for backwards compatibility with legacy components.
+- **Redirect Support**: Uses `pendingRole` logic in `localStorage` to handle race conditions where a user might be redirected by Clerk before the role is assigned.
 
-### Using RoleProtected Component
+### 2. The `RoleAssignment` Component
+Mounted in the `RootLayout`, this component monitors authentication state and redirects users:
+- **Auth Paths**: Redirects from `/sign-up`, `/login`, and `/` to the correct dashboard if a role exists.
+- **Dashboard Mapping**: 
+  - `BENEFICIARY` → `/onboarding`
+  - `OFFICER` → `/officer/applications`
 
+### 3. Usage in Components
 ```tsx
-import { OfficerOnly, BeneficiaryOnly } from '@/components/role-protected'
+const { role, assignRole, loading } = useUserRole();
 
-// For officer-only pages
-export default function OfficerPage() {
-  return (
-    <OfficerOnly>
-      <div>Officer dashboard content</div>
-    </OfficerOnly>
-  )
-}
+// Checking role
+if (role === 'OFFICER') { ... }
 
-// For beneficiary-only pages
-export default function BeneficiaryPage() {
-  return (
-    <BeneficiaryOnly>
-      <div>Beneficiary content</div>
-    </BeneficiaryOnly>
-  )
-}
+// Assigning role during signup
+await assignRole('BENEFICIARY');
 ```
 
-### Manual Role Checking
+---
 
-```tsx
-import { isOfficer, isBeneficiary } from '@/lib/clerk'
+## Guidelines for Teams
 
-// Check roles in components
-if (isOfficer()) {
-  // Show officer-specific content
-}
+### For the Backend Team
+- **Never trust client-side roles**. Always use the `authenticateUser` middleware which reads directly from Clerk's private metadata.
+- **Keep roles in Sync**: If you add new roles to the system, update the `ClerkService` validation and the `requireRole` middleware.
+- **Secret Management**: Ensure `CLERK_SECRET_KEY` is never exposed in client bundles or Git.
 
-if (isBeneficiary()) {
-  // Show beneficiary-specific content
-}
+### For the Frontend Team
+- **Use the Hook**: Always use `useUserRole()` instead of direct `localStorage` or `useAuth()` metadata access.
+- **Protect Pages**: Use the `RoleProtected` component to wrap entire page contents.
+- **Path Consistency**: Ensure all dashboard paths match the `RoleAssignment` redirect logic.
+
+---
+
+## Environment Configuration
+
+### Server (`.env`)
+```env
+# Database
+MONGODB_URI=...
+
+# Clerk Configuration
+CLERK_PUBLISHABLE_KEY=...
+CLERK_SECRET_KEY=...
+
+# Server
+PORT=5000
+NODE_ENV=development
+
+# CORS
+CORS_ORIGIN="http://localhost:3000"
 ```
 
-## Advanced Role Configuration
-
-### Custom Role Metadata
-
-You can add custom metadata to roles for more granular permissions:
-
-```typescript
-// In Clerk dashboard, add metadata to roles
-{
-  "permissions": ["view_applications", "approve_loans"],
-  "access_level": "high"
-}
+### Client (`.env.local`)
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_... (Required for Next.js Server Components)
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
-
-### Organization-Based Roles
-
-For more complex scenarios, use Clerk Organizations:
-
-1. Create organizations for different departments
-2. Assign roles within organizations
-3. Use organization membership for access control
-
-### Custom Claims
-
-Add custom claims to user sessions:
-
-```typescript
-// In Clerk dashboard, add custom claims
-{
-  "user_type": "beneficiary",
-  "department": "loans",
-  "permissions": ["read", "write"]
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Roles not appearing**: Ensure roles are properly assigned in Clerk dashboard
-2. **Styling not applying**: Check that appearance props are correctly formatted
-3. **Route protection not working**: Verify role checking logic in components
-
-### Debug Mode
-
-Enable Clerk debug mode:
-
-```bash
-# Add to .env.local
-CLERK_DEBUG=true
-```
-
-### Testing Roles
-
-1. Create test users in Clerk dashboard
-2. Assign different roles to test users
-3. Test role-based access in your application
-
-## Best Practices
-
-1. **Consistent Role Names**: Use consistent role IDs across your application
-2. **Graceful Fallbacks**: Always provide fallback content for unauthorized users
-3. **Performance**: Use memoization for role checking in frequently rendered components
-4. **Security**: Never rely solely on client-side role checking for sensitive operations
-
-## Next Steps
-
-1. **Backend Integration**: Connect Clerk user IDs to your backend systems
-2. **Audit Logs**: Set up logging for role changes and access attempts
-3. **Multi-tenancy**: Consider organization-based roles for multi-tenant applications
-4. **Advanced Permissions**: Implement fine-grained permission systems
-
-## Resources
-
-- [Clerk Roles Documentation](https://clerk.com/docs/roles/overview)
-- [Clerk Appearance API](https://clerk.com/docs/nextjs/appearance)
-- [Clerk Dashboard](https://dashboard.clerk.com)

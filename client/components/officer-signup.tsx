@@ -4,6 +4,8 @@ import { SignUp } from "@clerk/nextjs"
 import { Globe } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@clerk/nextjs"
+import { useUserRole } from "@/hooks/use-user-role"
 
 interface Translations {
   title: string
@@ -26,9 +28,10 @@ const translations: Record<string, Translations> = {
 
 export function OfficerSignUp() {
   const [language, setLanguage] = useState("en")
-  const [loading, setLoading] = useState(false)
   const router = useRouter()
-  
+  const { isSignedIn } = useAuth()
+  const { assignRole, loading, role } = useUserRole()
+
   const t = translations[language] || translations.en
 
   const toggleLanguage = () => {
@@ -37,11 +40,30 @@ export function OfficerSignUp() {
     localStorage.setItem("language", newLang)
   }
 
-  // Handle successful sign-up
+  // Handle successful Clerk sign-up
   useEffect(() => {
-    // Store role preference for post-signup processing
+    // Set pending role as soon as component mounts
     localStorage.setItem("pendingRole", "officer")
   }, [])
+
+  useEffect(() => {
+    async function handlePostSignup() {
+      if (isSignedIn && !loading && !role) {
+        try {
+          // Assign officer role via backend
+          await assignRole('OFFICER')
+          // Redirect to officer dashboard (existing flow)
+          router.push('/officer/applications')
+        } catch (error) {
+          console.error('Failed to assign role:', error)
+          // Stay on signup page, show error
+          alert('Failed to complete signup. Please try again.')
+        }
+      }
+    }
+
+    handlePostSignup()
+  }, [isSignedIn, loading, assignRole, router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -62,7 +84,8 @@ export function OfficerSignUp() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-6">
-          <SignUp 
+          <SignUp
+            routing="hash"
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-primary hover:bg-primary/90 text-primary-foreground w-full h-11 rounded-md font-medium',

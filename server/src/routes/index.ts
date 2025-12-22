@@ -1,8 +1,8 @@
 import express from 'express'
 import { authenticateUser, requireRole } from '../middleware/auth'
-import { UserService } from '../services/userService'
 import { ApplicationService } from '../services/applicationService'
 import { ReviewService } from '../services/reviewService'
+import authRoutes from './auth'
 
 interface AuthenticatedRequest extends express.Request {
   user?: {
@@ -16,29 +16,19 @@ const router = express.Router()
 
 // Public routes
 router.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    database: 'connected'
+    database: 'connected',
+    message: 'FinTrust API is running'
   })
 })
 
+// Auth routes (includes authentication middleware internally)
+router.use('/auth', authRoutes)
+
 // Protected routes
 router.use(authenticateUser)
-
-// User routes
-router.get('/user', async (req: AuthenticatedRequest, res) => {
-  try {
-    const user = await UserService.getUserByClerkId(req.user!.id)
-    if (!user) {
-      res.status(404).json({ error: 'User not found' })
-      return
-    }
-    res.json(user)
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get user' })
-  }
-})
 
 // Application routes
 router.post('/applications', async (req: AuthenticatedRequest, res) => {
@@ -76,7 +66,7 @@ router.get('/applications/:id', async (req: AuthenticatedRequest, res) => {
 })
 
 // Officer routes (require OFFICER or ADMIN role)
-router.get('/officer/applications', 
+router.get('/officer/applications',
   requireRole(['OFFICER', 'ADMIN']),
   async (req, res) => {
     try {
@@ -88,13 +78,13 @@ router.get('/officer/applications',
   }
 )
 
-router.put('/officer/applications/:id/status', 
+router.put('/officer/applications/:id/status',
   requireRole(['OFFICER', 'ADMIN']),
   async (req, res) => {
     try {
       const { status } = req.body
       const application = await ApplicationService.updateApplicationStatus(
-        req.params.id, 
+        req.params.id,
         status
       )
       if (!application) {
@@ -109,7 +99,7 @@ router.put('/officer/applications/:id/status',
 )
 
 // Review routes
-router.post('/officer/reviews', 
+router.post('/officer/reviews',
   requireRole(['OFFICER', 'ADMIN']),
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -124,7 +114,7 @@ router.post('/officer/reviews',
   }
 )
 
-router.get('/officer/applications/:id/reviews', 
+router.get('/officer/applications/:id/reviews',
   requireRole(['OFFICER', 'ADMIN']),
   async (req: AuthenticatedRequest, res) => {
     try {
