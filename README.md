@@ -5,6 +5,7 @@ A modern loan approval platform with AI-powered credit scoring and role-based ac
 ## Features
 
 ### Week 1 Implementation
+
 - **Role-Based Authentication**: Separate flows for Beneficiaries and Officers
 - **Beneficiary Flow**:
   - Login with username and password
@@ -22,17 +23,19 @@ A modern loan approval platform with AI-powered credit scoring and role-based ac
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18 or higher
 - npm or yarn
 
 ### Installation
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
-
 2. **Set up Clerk Authentication:**
+
    - Create a free account at [Clerk](https://clerk.com/)
    - Get your Publishable Key and Secret Key from the [API Keys page](https://dashboard.clerk.com/last-active?path=api-keys)
    - Add your keys to `.env.local`:
@@ -40,18 +43,18 @@ A modern loan approval platform with AI-powered credit scoring and role-based ac
      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key
      CLERK_SECRET_KEY=your_secret_key
      ```
-
 3. **Run the development server:**
+
    ```bash
    npm run dev
    ```
-
 4. **Open in browser:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Authentication
 
 The application now uses Clerk for authentication. Users can:
+
 - Sign up for new accounts
 - Sign in with existing accounts
 - Use Clerk's built-in authentication flows
@@ -89,17 +92,17 @@ The application now uses Clerk for authentication. Users can:
 
 ## Week 1 Requirements Compliance
 
-✅ Login screen with username and password  
-✅ Role-based routing (Beneficiary vs Officer)  
-✅ Beneficiary onboarding with required fields  
-✅ Consent screen with explicit user agreement  
-✅ Application status page  
-✅ Officer application list and detail views  
-✅ Credit score display with ML explanations  
-✅ Approve/Reject functionality  
-✅ Multi-language support (English/Hindi)  
-✅ Local storage for consent and application data  
-✅ No animations, focus on functionality  
+✅ Login screen with username and password
+✅ Role-based routing (Beneficiary vs Officer)
+✅ Beneficiary onboarding with required fields
+✅ Consent screen with explicit user agreement
+✅ Application status page
+✅ Officer application list and detail views
+✅ Credit score display with ML explanations
+✅ Approve/Reject functionality
+✅ Multi-language support (English/Hindi)
+✅ Local storage for consent and application data
+✅ No animations, focus on functionality
 ✅ Black theme UI
 
 ## Notes
@@ -212,6 +215,7 @@ For questions or support, please reach out to our development team.
 ## Changelog
 
 ### Week 1 (Current)
+
 - Initial frontend implementation
 - Role-based authentication
 - Multi-language support
@@ -219,6 +223,7 @@ For questions or support, please reach out to our development team.
 - Basic UI components
 
 ### Planned Features
+
 - Backend API integration
 - Database persistence
 - ML model integration
