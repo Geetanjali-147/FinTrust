@@ -2,6 +2,7 @@ import express from 'express'
 import { authenticateUser, requireRole } from '../middleware/auth'
 import { ApplicationService } from '../services/applicationService'
 import { ReviewService } from '../services/reviewService'
+import { ScoringService } from '../services/scoringService'
 import authRoutes from './auth'
 
 interface AuthenticatedRequest extends express.Request {
@@ -9,6 +10,12 @@ interface AuthenticatedRequest extends express.Request {
     id: string
     email: string
     role: string
+    // Additional user context from frontend
+    age?: number
+    gender?: string
+    income?: number
+    livelihood?: string
+    district?: string
   }
 }
 
@@ -33,12 +40,39 @@ router.use(authenticateUser)
 // Application routes
 router.post('/applications', async (req: AuthenticatedRequest, res) => {
   try {
+    // Create the application
     const application = await ApplicationService.createApplication(
       req.user!.id,
       req.body
     )
+
+    // Extract user context from request body for scoring
+    // Frontend sends: name, gender, age, address, district, livelihood, income
+    const userContext = {
+      age: req.body.age,
+      gender: req.body.gender,
+      income: req.body.income,
+      livelihood: req.body.livelihood,
+      district: req.body.district
+    }
+
+    // Trigger scoring asynchronously
+    // Score is calculated and saved in the background
+    if (ScoringService.isReady()) {
+      ScoringService.scoreAndSave(application, userContext)
+        .then(score => {
+          console.log(`📊 Application ${application._id} scored: ${score.creditworthy ? 'Approved' : 'Review needed'} (${(score.probability * 100).toFixed(1)}%)`)
+        })
+        .catch(err => {
+          console.error(`❌ Failed to score application ${application._id}:`, err)
+        })
+    } else {
+      console.warn('⚠️ Scoring service not ready, skipping automatic scoring')
+    }
+
     res.status(201).json(application)
   } catch (error) {
+    console.error('Failed to create application:', error)
     res.status(500).json({ error: 'Failed to create application' })
   }
 })
@@ -62,6 +96,31 @@ router.get('/applications/:id', async (req: AuthenticatedRequest, res) => {
     res.json(application)
   } catch (error) {
     res.status(500).json({ error: 'Failed to get application' })
+  }
+})
+
+// Score routes
+router.get('/applications/:id/score', async (req: AuthenticatedRequest, res) => {
+  try {
+    const score = await ScoringService.getScoreByApplicationId(req.params.id)
+    if (!score) {
+      res.status(404).json({ error: 'Score not found for this application' })
+      return
+    }
+    res.json(score)
+  } catch (error) {
+    console.error('Failed to get score:', error)
+    res.status(500).json({ error: 'Failed to get score' })
+  }
+})
+
+router.get('/scores', async (req: AuthenticatedRequest, res) => {
+  try {
+    const scores = await ScoringService.getUserScores(req.user!.id)
+    res.json(scores)
+  } catch (error) {
+    console.error('Failed to get user scores:', error)
+    res.status(500).json({ error: 'Failed to get scores' })
   }
 })
 
