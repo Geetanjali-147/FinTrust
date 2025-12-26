@@ -1,9 +1,11 @@
 import express from 'express'
 import { authenticateUser, requireRole } from '../middleware/auth'
+import { verifyConsent } from '../middleware/consent'
 import { ApplicationService } from '../services/applicationService'
 import { ReviewService } from '../services/reviewService'
 import { ScoringService } from '../services/scoringService'
 import authRoutes from './auth'
+import consentRoutes from './consent'
 
 interface AuthenticatedRequest extends express.Request {
   user?: {
@@ -37,9 +39,14 @@ router.use('/auth', authRoutes)
 // Protected routes
 router.use(authenticateUser)
 
+// Consent routes (protected - require authentication)
+router.use('/consent', consentRoutes)
+
 // Application routes
-router.post('/applications', async (req: AuthenticatedRequest, res) => {
+// IMPORTANT: verifyConsent middleware ensures no scoring happens without user consent
+router.post('/applications', verifyConsent('LOAN'), async (req: AuthenticatedRequest, res) => {
   try {
+    // Consent has been verified by middleware - safe to proceed
     // Create the application
     const application = await ApplicationService.createApplication(
       req.user!.id,
