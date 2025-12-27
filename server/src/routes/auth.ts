@@ -1,6 +1,7 @@
 import express from 'express'
 import { authenticateUser } from '../middleware/auth'
 import { ClerkService } from '../services/clerkService'
+import { UserService } from '../services/userService'
 
 interface AuthenticatedRequest extends express.Request {
     user?: {
@@ -29,8 +30,21 @@ router.post('/assign-role', authenticateUser, async (req: AuthenticatedRequest, 
         // Assign role to Clerk user's private metadata
         await ClerkService.assignRole(req.user!.id, role as 'BENEFICIARY' | 'OFFICER')
 
-        // Get updated user data
+        // Get updated user data from Clerk
         const user = await ClerkService.getUserWithRole(req.user!.id)
+
+        // Sync user to MongoDB
+        const existingUser = await UserService.getUserByClerkId(req.user!.id)
+
+        if (!existingUser) {
+            // Create new user in MongoDB
+            await UserService.createUser(req.user!.id, user.email, role)
+            console.log(`User synced to MongoDB (created): clerkId=${req.user!.id}, role=${role}`)
+        } else {
+            // Update existing user's role in MongoDB
+            await UserService.updateUserRole(req.user!.id, role)
+            console.log(`User synced to MongoDB (updated): clerkId=${req.user!.id}, role=${role}`)
+        }
 
         res.json({
             success: true,
