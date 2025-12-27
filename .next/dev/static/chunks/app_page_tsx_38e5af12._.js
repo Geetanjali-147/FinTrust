@@ -8,7 +8,7 @@
   "static/chunks/node_modules_@react-three_fiber_dist_d7a52e39._.js",
   "static/chunks/node_modules_tailwind-merge_dist_bundle-mjs_mjs_56b6fd65._.js",
   "static/chunks/node_modules_troika-three-text_dist_troika-three-text_esm_94005891.js",
-  "static/chunks/node_modules_6e117d6e._.js",
+  "static/chunks/node_modules_fba68b3d._.js",
   "static/chunks/_b1f9b349._.js"
 ],
     source: "dynamic"

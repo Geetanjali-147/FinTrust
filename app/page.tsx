@@ -10,28 +10,28 @@ import { CoinsBackground } from "@/components/coins-background"
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background relative">
+    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
       <CoinsBackground />
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <header className="border-b border-border/50 sticky top-0 glass-strong z-50">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2 font-bold text-xl">
-            <span className="text-primary">LoanFlow</span>
+            <span className="gradient-text">LoanFlow</span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href="#features" className="text-muted-foreground hover:text-primary transition-colors">
+            <Link href="#features" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105">
               Features
             </Link>
-            <Link href="#about" className="text-muted-foreground hover:text-primary transition-colors">
+            <Link href="#about" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105">
               About
             </Link>
-            <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors">
+            <Link href="/login" className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105">
               Login
             </Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button size="sm">Get Started</Button>
+              <Button size="sm" className="glow-cyan hover-lift shimmer">Get Started</Button>
             </Link>
           </div>
         </div>
@@ -45,17 +45,17 @@ export default function LandingPage() {
             <div className="flex flex-col items-center text-center">
               <div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none mb-6">
-                  Smart Loans, <span className="text-primary">Instantly Approved</span>
+                  Smart Loans, <span className="gradient-text">Instantly Approved</span>
                 </h1>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mb-8">
                   AI-powered credit scoring and loan approval system that gets you the money you need, faster than ever.
                 </p>
               </div>
-              <div className="space-x-4">
-                <Button asChild size="lg" className="h-11 px-8">
+              <div className="flex gap-4">
+                <Button asChild size="lg" className="h-11 px-8 glow-cyan hover-lift animated-gradient">
                   <Link href="/login">Apply Now</Link>
                 </Button>
-                <Button variant="outline" size="lg" className="h-11 px-8">
+                <Button variant="outline" size="lg" className="h-11 px-8 glass hover-lift border-primary/50">
                   Learn More
                 </Button>
               </div>
@@ -69,21 +69,23 @@ export default function LandingPage() {
         <StatsSection />
 
         {/* Features Section */}
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50 relative overflow-hidden">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/30 relative overflow-hidden">
           <Features3D />
           <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm text-primary mb-6">Key Features</div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">Why Choose LoanFlow?</h2>
+              <div className="inline-block rounded-full glass px-4 py-2 text-sm gradient-text font-semibold mb-6">Key Features</div>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">Why Choose <span className="gradient-text">LoanFlow</span>?</h2>
               <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Our platform combines cutting-edge technology with banking expertise to deliver the best loan experience.
               </p>
             </div>
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 py-12 md:grid-cols-2 lg:grid-cols-4 mt-8">
-              <Card className="bg-background">
+              <Card className="glass-strong hover-lift border-primary/20 group">
                 <CardHeader>
-                  <Zap className="h-10 w-10 mb-2 text-primary" />
-                  <CardTitle>Lightning Fast</CardTitle>
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:glow-cyan transition-all duration-300">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="group-hover:gradient-text transition-all duration-300">Lightning Fast</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -91,10 +93,12 @@ export default function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-background">
+              <Card className="glass-strong hover-lift border-accent/20 group">
                 <CardHeader>
-                  <ShieldCheck className="h-10 w-10 mb-2 text-primary" />
-                  <CardTitle>Bank-Grade Security</CardTitle>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:glow-purple transition-all duration-300">
+                    <ShieldCheck className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="group-hover:gradient-text transition-all duration-300">Bank-Grade Security</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -102,10 +106,12 @@ export default function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-background">
+              <Card className="glass-strong hover-lift border-primary/20 group">
                 <CardHeader>
-                  <BarChart3 className="h-10 w-10 mb-2 text-primary" />
-                  <CardTitle>AI Insights</CardTitle>
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:glow-cyan transition-all duration-300">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="group-hover:gradient-text transition-all duration-300">AI Insights</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -113,10 +119,12 @@ export default function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-background">
+              <Card className="glass-strong hover-lift border-accent/20 group">
                 <CardHeader>
-                  <Mail className="h-10 w-10 mb-2 text-primary" />
-                  <CardTitle>Smart Alerts</CardTitle>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:glow-purple transition-all duration-300">
+                    <Mail className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="group-hover:gradient-text transition-all duration-300">Smart Alerts</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
