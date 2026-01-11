@@ -118,7 +118,7 @@ function FloatingItems() {
 
 export function CoinsBackground() {
     return (
-        <div className="fixed inset-0 z-0 pointer-events-none fade-in">
+        <div className="fixed inset-0 z-0 pointer-events-none fade-in bg-multicolor-gradient opacity-20 mix-blend-overlay" aria-hidden="true">
             <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
                 <ambientLight intensity={0.8} />
                 <pointLight position={[10, 10, 10]} intensity={1.5} />

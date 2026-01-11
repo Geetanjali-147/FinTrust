@@ -83,10 +83,10 @@ export function LoginForm({ language }: { language: string }) {
 
   if (success) {
     return (
-      <Card className="border-border bg-card">
+      <Card className="border-border bg-card/90 backdrop-blur-sm shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl text-green-600">Login Successful</CardTitle>
-          <CardDescription>Welcome back, {username}!</CardDescription>
+          <CardDescription className="text-foreground">Welcome back, {username}!</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
@@ -101,15 +101,15 @@ export function LoginForm({ language }: { language: string }) {
   }
 
   return (
-    <Card className="border-border bg-card">
+    <Card className="border-border bg-card/90 backdrop-blur-sm shadow-xl">
       <CardHeader>
-        <CardTitle className="text-2xl">{t.signIn}</CardTitle>
-        <CardDescription>{t.enterCredentials}</CardDescription>
+        <CardTitle className="text-2xl text-foreground">{t.signIn}</CardTitle>
+        <CardDescription className="text-muted-foreground">{t.enterCredentials}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">{t.username}</Label>
+            <Label htmlFor="username" className="text-foreground font-semibold">{t.username}</Label>
             <Input
               id="username"
               type="text"
@@ -121,7 +121,7 @@ export function LoginForm({ language }: { language: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">{t.password}</Label>
+            <Label htmlFor="password" className="text-foreground font-semibold">{t.password}</Label>
             <Input
               id="password"
               type="password"
@@ -133,10 +133,10 @@ export function LoginForm({ language }: { language: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="role">{t.role}</Label>
+            <Label htmlFor="role" className="text-foreground font-semibold">{t.role}</Label>
             <Select value={role} onValueChange={(value) => setRole(value as "beneficiary" | "officer")}>
               <SelectTrigger className="bg-secondary border-border text-foreground">
-                <SelectValue placeholder={t.selectRole} />
+                <SelectValue placeholder={t.selectRole} className="text-foreground" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="beneficiary">{t.beneficiary}</SelectItem>

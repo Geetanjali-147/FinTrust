@@ -41,11 +41,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased palette-vibrant`}>
+        <script>
+          {`document.addEventListener('DOMContentLoaded', function() {
+            const savedPalette = localStorage.getItem('selectedPalette');
+            if (savedPalette) {
+              // Remove the default palette-vibrant class and add the saved one
+              document.body.classList.remove('palette-vibrant');
+              document.body.classList.remove('palette-sunset', 'palette-ocean', 'palette-forest', 'palette-neon', 'palette-rainbow', 'palette-mystic', 'palette-tropical', 'palette-cosmic');
+              document.body.classList.add('palette-' + savedPalette);
+            } else {
+              // Default palette-vibrant is already applied by server
+            }
+          });`}
+        </script>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}

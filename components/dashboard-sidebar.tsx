@@ -46,26 +46,30 @@ export function DashboardSidebar({ className }: SidebarProps) {
     ]
 
     return (
-        <div className={cn("pb-12 h-screen border-r bg-background", className)}>
-            <div className="space-y-4 py-4">
+        <div className={cn("pb-12 h-screen border-r bg-background/60 backdrop-blur-sm", className)}>
+            <div className="fancy-card mx-3 mt-4">
+                <div className="space-y-4 py-4">
                 <div className="px-3 py-2">
                     <Link href="/" className="flex items-center pl-3 mb-9">
                         <h2 className="text-2xl font-bold tracking-tight text-primary">LoanFlow</h2>
                     </Link>
                     <div className="space-y-1">
-                        {routes.map((route) => (
-                            <Button
-                                key={route.href}
-                                variant={route.active ? "secondary" : "ghost"}
-                                className="w-full justify-start"
-                                asChild
-                            >
-                                <Link href={route.href}>
-                                    <route.icon className="mr-2 h-4 w-4" />
-                                    {route.label}
-                                </Link>
-                            </Button>
-                        ))}
+                        {routes.map((route) => {
+                            const Icon = route.icon
+                            return (
+                                <Button
+                                    key={route.href}
+                                    variant={route.active ? "secondary" : "ghost"}
+                                    className="w-full justify-start"
+                                    asChild
+                                >
+                                    <Link href={route.href}>
+                                        <Icon className="mr-2 h-4 w-4" />
+                                        {route.label}
+                                    </Link>
+                                </Button>
+                            )
+                        })}
                     </div>
                 </div>
                 <div className="px-3 py-2">
@@ -88,6 +92,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     )
 }
