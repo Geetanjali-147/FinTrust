@@ -9,7 +9,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FinTrust - Simplified Loan Approvals",
+  title: "LoanFlow - Simplified Loan Approvals",
   description: "AI-powered credit score management and loan approval platform",
   generator: "v0.app",
   icons: {
@@ -32,9 +32,7 @@ export const metadata: Metadata = {
 }
 
 import { ThemeProvider } from "@/components/theme-provider"
-import { RoleAssignment } from "@/components/role-assignment"
-
-// ... imports
+import { Toaster } from "@/components/ui/sonner"
 
 export default function RootLayout({
   children,
@@ -42,17 +40,49 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "hsl(262, 83%, 58%)",
+          colorBackground: "hsl(224, 71%, 4%)",
+          colorText: "hsl(210, 20%, 98%)",
+          colorInputBackground: "hsl(215, 28%, 17%)",
+          colorInputText: "hsl(210, 20%, 98%)",
+        },
+        elements: {
+          formButtonPrimary: "bg-primary text-primary-foreground hover:bg-primary/90",
+          card: "bg-card border border-border",
+          headerTitle: "text-foreground",
+          headerSubtitle: "text-muted-foreground",
+          socialButtonsBlockButton: "bg-secondary text-secondary-foreground border border-border",
+          formFieldLabel: "text-foreground",
+          formFieldInput: "bg-secondary border border-border text-foreground",
+          footerActionLink: "text-primary hover:text-primary/80",
+        },
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
-        <body className={`font-sans antialiased`}>
+        <body className={`font-sans antialiased palette-vibrant`}>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `document.addEventListener('DOMContentLoaded', function() {
+              const savedPalette = localStorage.getItem('selectedPalette');
+              if (savedPalette) {
+                document.body.classList.remove('palette-vibrant');
+                document.body.classList.remove('palette-sunset', 'palette-ocean', 'palette-forest', 'palette-neon', 'palette-rainbow', 'palette-mystic', 'palette-tropical', 'palette-cosmic');
+                document.body.classList.add('palette-' + savedPalette);
+              }
+            });`,
+            }}
+          />
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
-            enableSystem
+            defaultTheme="light"
+            enableSystem={false}
             disableTransitionOnChange
           >
             {children}
-            <RoleAssignment />
+            <Toaster />
             <Analytics />
           </ThemeProvider>
         </body>

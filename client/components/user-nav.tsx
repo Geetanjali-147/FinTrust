@@ -15,6 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ThemeSelector } from "@/components/theme-selector"
 
 export function UserNav() {
     const [user, setUser] = useState({ name: "User", email: "user@example.com", initials: "U" })
@@ -63,6 +64,9 @@ export function UserNav() {
                             <span>Settings</span>
                             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                         </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="p-0 h-auto">
+                        <ThemeSelector />
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />

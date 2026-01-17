@@ -6,40 +6,30 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { FileText, Search, LogOut } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { FileText, Search, LogOut, AlertCircle } from "lucide-react"
 
-const mockApplications = [
-  {
-    id: "LA-12345678",
-    name: "Rajesh Kumar",
-    district: "Mumbai",
-    livelihood: "Small Business Owner",
-    status: "pending",
-    submittedDate: "2024-01-15",
-    creditScore: 720,
-  },
-  {
-    id: "LA-12345679",
-    name: "Priya Sharma",
-    district: "Delhi",
-    livelihood: "Shopkeeper",
-    status: "pending",
-    submittedDate: "2024-01-14",
-    creditScore: 680,
-  },
-  {
-    id: "LA-12345680",
-    name: "Amit Patel",
-    district: "Ahmedabad",
-    livelihood: "Farmer",
-    status: "pending",
-    submittedDate: "2024-01-13",
-    creditScore: 650,
-  },
-]
+// API base URL - adjust based on your environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+
+interface Application {
+  _id: string
+  userId: {
+    _id?: string
+    email?: string
+    role?: string
+  } | string
+  loanAmount: number
+  purpose: string
+  status: "PENDING" | "APPROVED" | "REJECTED" | "UNDER_REVIEW"
+  createdAt: string
+  updatedAt: string
+}
 
 export default function ApplicationsListPage() {
-  const [applications, setApplications] = useState(mockApplications)
+  const [applications, setApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
@@ -47,20 +37,112 @@ export default function ApplicationsListPage() {
     const role = localStorage.getItem("role")
     if (role !== "officer") {
       router.push("/")
+      return
     }
+
+    fetchApplications()
   }, [router])
+
+  const fetchApplications = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Get the auth token from localStorage
+      // In production with Clerk, use: const token = await getToken()
+      const token = localStorage.getItem("token")
+
+      const response = await fetch(`${API_BASE_URL}/api/officer/applications`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized. Please log in again.")
+        }
+        if (response.status === 403) {
+          throw new Error("Access denied. Officer role required.")
+        }
+        throw new Error("Failed to fetch applications")
+      }
+
+      const data = await response.json()
+      setApplications(data)
+    } catch (err) {
+      console.error("Error fetching applications:", err)
+      setError(err instanceof Error ? err.message : "Failed to load applications")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleLogout = () => {
     localStorage.clear()
     router.push("/")
   }
 
-  const filteredApplications = applications.filter(
-    (app) =>
-      app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.district.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "APPROVED":
+        return "default"
+      case "REJECTED":
+        return "destructive"
+      case "UNDER_REVIEW":
+        return "secondary"
+      default:
+        return "outline"
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Pending"
+      case "APPROVED":
+        return "Approved"
+      case "REJECTED":
+        return "Rejected"
+      case "UNDER_REVIEW":
+        return "Under Review"
+      default:
+        return status
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const getUserEmail = (userId: Application["userId"]) => {
+    if (typeof userId === "object" && userId?.email) {
+      return userId.email
+    }
+    return "Unknown"
+  }
+
+  const filteredApplications = applications.filter((app) => {
+    const email = getUserEmail(app.userId).toLowerCase()
+    const purpose = app.purpose.toLowerCase()
+    const id = app._id.toLowerCase()
+    const query = searchQuery.toLowerCase()
+    return email.includes(query) || purpose.includes(query) || id.includes(query)
+  })
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -85,39 +167,96 @@ export default function ApplicationsListPage() {
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, ID, or district..."
+                placeholder="Search by email, purpose, or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 bg-secondary border-border"
               />
             </div>
 
-            <div className="space-y-3">
-              {filteredApplications.map((app) => (
-                <div
-                  key={app.id}
-                  onClick={() => router.push(`/officer/applications/${app.id}`)}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
-                    <div>
-                      <p className="font-semibold">{app.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {app.id} • {app.district} • {app.livelihood}
-                      </p>
+            {/* Loading State */}
+            {loading && (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-8 w-8 rounded" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-48" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right space-y-2">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                      <Skeleton className="h-6 w-16 rounded-full" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">Score: {app.creditScore}</p>
-                      <p className="text-xs text-muted-foreground">{app.submittedDate}</p>
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                <p className="text-lg font-medium text-destructive mb-2">Error Loading Applications</p>
+                <p className="text-muted-foreground mb-4">{error}</p>
+                <Button onClick={fetchApplications} variant="outline">
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && applications.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium mb-2">No Applications Found</p>
+                <p className="text-muted-foreground">There are no loan applications to review at this time.</p>
+              </div>
+            )}
+
+            {/* Applications List */}
+            {!loading && !error && filteredApplications.length > 0 && (
+              <div className="space-y-3">
+                {filteredApplications.map((app) => (
+                  <div
+                    key={app._id}
+                    onClick={() => router.push(`/officer/applications/${app._id}`)}
+                    className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <FileText className="h-8 w-8 text-muted-foreground" />
+                      <div>
+                        <p className="font-semibold">{getUserEmail(app.userId)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {app._id.slice(-8).toUpperCase()} • {app.purpose} • {formatCurrency(app.loanAmount)}
+                        </p>
+                      </div>
                     </div>
-                    <Badge variant="secondary">Pending</Badge>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{formatCurrency(app.loanAmount)}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(app.createdAt)}</p>
+                      </div>
+                      <Badge variant={getStatusBadgeVariant(app.status)}>{getStatusLabel(app.status)}</Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* No Search Results */}
+            {!loading && !error && applications.length > 0 && filteredApplications.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Search className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium mb-2">No Results Found</p>
+                <p className="text-muted-foreground">Try adjusting your search query.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

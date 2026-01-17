@@ -61,7 +61,7 @@ function FloatingShape2() {
 
 export function Hero3D() {
     return (
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-30 bg-multicolor-gradient mix-blend-screen" aria-hidden="true">
             <Canvas>
                 <PerspectiveCamera makeDefault position={[0, 0, 10]} />
                 <ambientLight intensity={0.5} />

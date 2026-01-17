@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   --background: oklch(0.12 0 0);
   --foreground: oklch(0.98 0 0);
@@ -81,7 +79,7 @@
   --sidebar-ring: oklch(0.70 0.20 250);
 }
 
-@theme inline {
+:root {
   --font-sans: "Geist", "Geist Fallback";
   --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
@@ -124,9 +122,270 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--color-border);
+    outline-color: color-mix(in oklab, var(--color-ring) 50%, transparent);
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
 }
+
+/* Multi-color palette helpers and attractive UI utilities */
+:root {
+  /* Palette stops for vibrant gradients */
+  --multi-a: 225 85% 55%; /* soft blue */
+  --multi-b: 290 75% 60%; /* pink/purple */
+  --multi-c: 170 70% 50%; /* teal */
+  --multi-d: 30 85% 55%;  /* warm yellow */
+}
+
+/* Named palettes (apply one of these classes on <body> or .app container) */
+.palette-sunset {
+  --accent-1: oklch(0.78 0.18 320); /* pink/purple */
+  --accent-2: oklch(0.82 0.16 280); /* purple/blue */
+  --accent-3: oklch(0.75 0.15 40);  /* warm yellow/orange */
+}
+.palette-ocean {
+  --accent-1: oklch(0.75 0.18 200); /* deep blue */
+  --accent-2: oklch(0.70 0.16 180); /* teal */
+  --accent-3: oklch(0.72 0.14 240); /* violet */
+}
+.palette-forest {
+  --accent-1: oklch(0.70 0.16 120); /* green */
+  --accent-2: oklch(0.68 0.18 140); /* lime green */
+  --accent-3: oklch(0.64 0.16 100); /* yellow-green */
+}
+.palette-neon {
+  --accent-1: oklch(0.80 0.22 260); /* electric blue */
+  --accent-2: oklch(0.78 0.20 200); /* cyan */
+  --accent-3: oklch(0.82 0.21 320); /* hot pink */
+}
+.palette-vibrant {
+  --accent-1: oklch(0.85 0.20 0);   /* red */
+  --accent-2: oklch(0.88 0.18 60);  /* yellow */
+  --accent-3: oklch(0.82 0.15 120); /* green */
+}
+.palette-rainbow {
+  --accent-1: oklch(0.80 0.22 0);   /* red */
+  --accent-2: oklch(0.85 0.18 60);  /* yellow */
+  --accent-3: oklch(0.78 0.20 120); /* green */
+  --accent-4: oklch(0.75 0.15 240); /* blue */
+  --accent-5: oklch(0.70 0.18 300); /* purple */
+}
+.palette-mystic {
+  --accent-1: oklch(0.75 0.18 280); /* purple */
+  --accent-2: oklch(0.72 0.16 300); /* violet */
+  --accent-3: oklch(0.78 0.14 320); /* magenta */
+}
+.palette-tropical {
+  --accent-1: oklch(0.82 0.18 100); /* lime */
+  --accent-2: oklch(0.78 0.16 60);  /* yellow */
+  --accent-3: oklch(0.80 0.14 40);  /* orange */
+}
+.palette-cosmic {
+  --accent-1: oklch(0.80 0.20 240); /* blue */
+  --accent-2: oklch(0.75 0.18 280); /* purple */
+  --accent-3: oklch(0.85 0.16 320); /* pink */
+}
+
+/* Fancy gradient backgrounds for heroes, headers */
+.bg-multicolor-gradient {
+  background-image: linear-gradient(135deg, color-mix(in oklab, var(--accent-1) 55%, transparent), color-mix(in oklab, var(--accent-2) 45%, transparent) 55%, color-mix(in oklab, var(--accent-3) 35%, transparent));
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Attractive card styles */
+.fancy-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid color-mix(in oklab, var(--accent-1) 12%, transparent);
+  box-shadow: 0 6px 30px rgba(2,6,23,0.35);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 1.25rem;
+}
+
+/* Gradient button utility (works with tailwind classes) */
+.btn-gradient {
+  background-image: linear-gradient(90deg, var(--accent-1), var(--accent-2) 45%, var(--accent-3));
+  background-size: 200% auto;
+  color: var(--accent-foreground, var(--primary-foreground));
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--accent-1) 35%, transparent);
+  transition: transform .18s ease, background-position .6s ease, box-shadow .18s ease;
+}
+.btn-gradient:hover { transform: translateY(-3px); background-position: 100% center; }
+.btn-gradient:active { transform: translateY(0); }
+
+/* Hero overlay helpers */
+.hero-overlay { background: linear-gradient(180deg, rgba(0,0,0,0.06), transparent); }
+
+/* subtle rainbow text utility */
+.rainbow-text { background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Enhanced multicolor utilities */
+.multicolor-border { border: 2px solid; border-image: linear-gradient(45deg, var(--accent-1), var(--accent-2), var(--accent-3)) 1; }
+
+.multicolor-text { background: linear-gradient(45deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-1)); background-size: 300% 300%; background-clip: text; -webkit-background-clip: text; color: transparent; animation: gradientAnimation 3s ease infinite; }
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.multicolor-shadow { box-shadow: 0 4px 20px color-mix(in oklab, var(--accent-1) 40%, transparent), 0 8px 30px color-mix(in oklab, var(--accent-2) 30%, transparent); }
+
+/* Animated gradient backgrounds */
+.animated-multicolor-bg {
+  background: linear-gradient(-45deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-1));
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Multicolor card enhancements */
+.multicolor-card {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent-1) 10%, transparent), color-mix(in oklab, var(--accent-2) 5%, transparent));
+  border: 1px solid color-mix(in oklab, var(--accent-3) 20%, transparent);
+  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--accent-1) 25%, transparent);
+  transition: all 0.3s ease;
+}
+
+.multicolor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px -10px color-mix(in oklab, var(--accent-2) 35%, transparent);
+  border-color: color-mix(in oklab, var(--accent-1) 40%, transparent);
+}
+
+/* Multicolor button enhancements */
+.btn-multicolor {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+  color: white;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-multicolor:hover {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent-3), var(--accent-1));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--accent-1) 40%, transparent);
+}
+
+.btn-multicolor:active {
+  transform: translateY(0);
+}
+
+/* Multicolor progress bars */
+.multicolor-progress {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Multicolor dividers */
+.multicolor-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-1), var(--accent-2), var(--accent-3), transparent);
+  margin: 20px 0;
+}
+
+/* Multicolor badges */
+.multicolor-badge {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Enhanced multicolor hover effects */
+.hover-multicolor {
+  transition: all 0.3s ease;
+}
+
+.hover-multicolor:hover {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px color-mix(in oklab, var(--accent-1) 30%, transparent);
+}
+
+/* Multicolor borders */
+.border-multicolor {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, var(--accent-1), var(--accent-2), var(--accent-3)) 1;
+}
+
+/* Multicolor input fields */
+.input-multicolor {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent-1) 5%, transparent), color-mix(in oklab, var(--accent-2) 2%, transparent));
+  border: 1px solid color-mix(in oklab, var(--accent-3) 30%, transparent);
+  transition: all 0.3s ease;
+}
+
+.input-multicolor:focus {
+  border: 1px solid color-mix(in oklab, var(--accent-1) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-1) 20%, transparent);
+}
+
+/* Multicolor progress bars */
+.progress-multicolor {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--accent-1) 10%, transparent);
+}
+
+.progress-multicolor::-webkit-progress-bar {
+  background: color-mix(in oklab, var(--accent-1) 10%, transparent);
+}
+
+.progress-multicolor::-webkit-progress-value {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+}
+
+/* Multicolor table rows */
+.table-row-multicolor:nth-child(even) {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--accent-1) 5%, transparent), color-mix(in oklab, var(--accent-2) 2%, transparent));
+}
+
+.table-row-multicolor:hover {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--accent-3) 15%, transparent), color-mix(in oklab, var(--accent-1) 8%, transparent));
+}
+
+/* Multicolor tooltip */
+.tooltip-multicolor {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px color-mix(in oklab, var(--accent-1) 40%, transparent);
+}
+
+/* Animated multicolor pulse */
+.pulse-multicolor {
+  animation: pulseMulticolor 2s infinite;
+}
+
+@keyframes pulseMulticolor {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-1) 40%, transparent); }
+  70% { box-shadow: 0 0 0 10px color-mix(in oklab, var(--accent-1) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-1) 0%, transparent); }
+}
+
